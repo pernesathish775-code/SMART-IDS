@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ person.name }} — Detail{% endblock %}
+{% block page_title %}Person Detail{% endblock %}
+
+{% block content %}
+<div class="row mt-2">
+  <div class="col-md-4 text-center">
+    {% if person.image_path %}
+    <img src="{{ url_for('people.serve_face_image', filename=person.image_path) }}"
+         class="rounded img-fluid" style="max-height:300px;object-fit:cover" alt="{{ person.name }}"/>
+    {% else %}
+    <div class="cam-placeholder rounded" style="height:200px">
+      <i class="bi bi-person-bounding-box fs-1 text-muted"></i>
+    </div>
+    {% endif %}
+  </div>
+  <div class="col-md-8">
+    <div class="dash-card">
+      <h4 class="text-cyan">{{ person.name }}</h4>
+      <table class="table table-dark table-sm">
+        <tr><th>ID</th><td>{{ person.id }}</td></tr>
+        <tr><th>Identifier</th><td>{{ person.identifier or '—' }}</td></tr>
+        <tr><th>Registered</th><td>{{ person.created_at.strftime('%d %b %Y %H:%M') if person.created_at else '—' }}</td></tr>
+        <tr><th>Total Detections</th><td>{{ person.events|length }}</td></tr>
+      </table>
+      <div class="d-flex gap-2 mt-2">
+        <a href="{{ url_for('people.list_people') }}" class="btn btn-outline-secondary btn-sm">Back</a>
+        <button class="btn btn-danger btn-sm"
+                data-bs-toggle="modal" data-bs-target="#delModal">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete modal -->
+<div class="modal fade" id="delModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content bg-dark border-secondary">
+      <div class="modal-body text-center">
+        <p>Delete <strong>{{ person.name }}</strong>?</p>
+        <form method="POST" action="{{ url_for('people.delete_person', person_id=person.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <button class="btn btn-danger btn-sm me-2">Delete</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

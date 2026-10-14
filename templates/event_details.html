@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Event #{{ event.id }}{% endblock %}
+{% block page_title %}Event Detail{% endblock %}
+
+{% block content %}
+<div class="row mt-2">
+  <div class="col-md-6">
+    <div class="dash-card">
+      <h6 class="card-section-title">Event #{{ event.id }}</h6>
+      <table class="table table-dark table-sm">
+        <tr><th>Type</th>
+          <td><span class="badge {% if event.event_type == 'RECOGNIZED' %}bg-success{% elif event.event_type == 'UNKNOWN' %}bg-danger{% else %}bg-secondary{% endif %}">{{ event.event_type }}</span></td>
+        </tr>
+        <tr><th>Person</th><td>{{ person.name if person else 'UNKNOWN' }}</td></tr>
+        <tr><th>Time (UTC)</th><td>{{ event.detected_at.strftime('%d %b %Y %H:%M:%S') if event.detected_at else '—' }}</td></tr>
+        <tr><th>Email Status</th><td>
+          <span class="badge {% if event.email_status == 'sent' %}bg-success{% elif event.email_status == 'failed' %}bg-danger{% else %}bg-secondary{% endif %}">
+            {{ event.email_status or '—' }}
+          </span>
+        </td></tr>
+        <tr><th>Snapshot</th><td>{% if snapshot_exists %}Available{% else %}Not saved{% endif %}</td></tr>
+      </table>
+      <a href="{{ url_for('events.history') }}" class="btn btn-sm btn-outline-secondary mt-2">← Back to History</a>
+    </div>
+  </div>
+  {% if snapshot_exists %}
+  <div class="col-md-6">
+    <div class="dash-card text-center">
+      <h6 class="card-section-title">Snapshot</h6>
+      <img src="{{ url_for('events.view_snapshot', filename=event.snapshot_path) }}"
+           class="img-fluid rounded" style="max-height:320px" alt="Snapshot"/>
+      <p class="text-muted small mt-2">
+        Note: An unknown face means the system could not match this face
+        with the registered database. It does not imply malicious intent.
+      </p>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

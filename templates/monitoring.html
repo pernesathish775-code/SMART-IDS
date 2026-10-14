@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Live Monitoring{% endblock %}
+{% block page_title %}Live Monitoring{% endblock %}
+
+{% block content %}
+<div class="row g-3 mt-1">
+  <!-- Camera feed -->
+  <div class="col-lg-8">
+    <div class="dash-card">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="card-section-title mb-0">Camera Feed</h6>
+        <span id="camStatus" class="badge {% if is_running %}bg-success{% else %}bg-secondary{% endif %}">
+          {% if is_running %}Running{% else %}Stopped{% endif %}
+        </span>
+      </div>
+
+      <!-- Live feed image (MJPEG) -->
+      <div class="cam-container">
+        {% if is_running %}
+        <img id="camFeed" src="{{ url_for('monitoring.video_feed') }}"
+             class="cam-feed" alt="Live Feed"/>
+        {% else %}
+        <div id="camPlaceholder" class="cam-placeholder">
+          <i class="bi bi-camera-video-off"></i>
+          <p>Camera is offline. Press Start to begin monitoring.</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Recognition result -->
+      <div class="mt-3 p-2 rounded bg-dark border border-secondary">
+        <span class="text-muted me-2">Result:</span>
+        <span id="resultLabel" class="fw-bold {% if 'UNKNOWN' in latest_result %}text-danger{% elif 'RECOGNIZED' in latest_result %}text-success{% else %}text-muted{% endif %}">
+          {{ latest_result }}
+        </span>
+      </div>
+
+      <!-- Buttons -->
+      <div class="mt-3 d-flex gap-2">
+        {% if not is_running %}
+        <form method="POST" action="{{ url_for('monitoring.start') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <button class="btn btn-success"><i class="bi bi-play-fill me-1"></i>Start Camera</button>
+        </form>
+        {% else %}
+        <form method="POST" action="{{ url_for('monitoring.stop') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <button class="btn btn-danger"><i class="bi bi-stop-fill me-1"></i>Stop Camera</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent events sidebar -->
+  <div class="col-lg-4">
+    <div class="dash-card">
+      <h6 class="card-section-title">Recent Events</h6>
+      {% if recent_events %}
+      <div id="recentList">
+        {% for ev in recent_events %}
+        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary">
+          <span class="badge {% if ev.event_type == 'RECOGNIZED' %}bg-success{% elif ev.event_type == 'UNKNOWN' %}bg-danger{% else %}bg-secondary{% endif %}">
+            {{ ev.event_type }}
+          </span>
+          <span class="small">{{ ev.person.name if ev.person else 'UNKNOWN' }}</span>
+          <span class="text-muted small">{{ ev.detected_at.strftime('%H:%M:%S') if ev.detected_at else '' }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted small text-center py-3">No events yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Privacy notice -->
+    <div class="dash-card mt-3 border border-warning">
+      <h6 class="text-warning"><i class="bi bi-info-circle me-1"></i>Privacy Notice</h6>
+      <p class="text-muted small mb-0">
+        This system captures face images and generates biometric face encodings.
+        Only register individuals who have given informed consent.
+        Face data is stored locally and is not shared externally.
+        This system is for academic demonstration only and is not suitable for
+        consequential access control decisions.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if is_running %}
+<script src="{{ url_for('static', filename='js/monitoring.js') }}"></script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+<div class="row g-3 mt-1">
+
+  <!-- Recognition settings -->
+  <div class="col-md-6">
+    <div class="dash-card">
+      <h6 class="card-section-title">Face Recognition Settings</h6>
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <input type="hidden" name="action" value="save_settings"/>
+
+        <div class="mb-3">
+          <label class="form-label text-light">
+            Recognition Threshold
+            <span class="text-muted small">(0.1 – 1.0)</span>
+          </label>
+          <input type="number" name="threshold" step="0.01" min="0.1" max="1.0"
+                 value="{{ threshold }}"
+                 class="form-control bg-dark text-light border-secondary"/>
+          <div class="form-text text-muted">
+            Lower = stricter matching. 0.55 is recommended. Higher values recognise more
+            faces but may produce false positives. Accuracy depends on image quality and lighting.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-light">
+            Event Cooldown (seconds)
+          </label>
+          <input type="number" name="cooldown" min="1" max="3600"
+                 value="{{ cooldown }}"
+                 class="form-control bg-dark text-light border-secondary"/>
+          <div class="form-text text-muted">
+            Minimum seconds between two events for the same face. Prevents flooding the database.
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-cyan btn-sm">Save Settings</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Email settings -->
+  <div class="col-md-6">
+    <div class="dash-card">
+      <h6 class="card-section-title">Email Alerts</h6>
+      <table class="table table-dark table-sm">
+        <tr><th>Status</th>
+          <td><span class="badge {% if mail_enabled %}bg-success{% else %}bg-secondary{% endif %}">
+            {% if mail_enabled %}Enabled{% else %}Disabled{% endif %}
+          </span></td>
+        </tr>
+        <tr><th>Sender</th><td class="text-muted">{{ mail_sender or 'Not set' }}</td></tr>
+        <tr><th>Receiver</th><td class="text-muted">{{ mail_receiver or 'Not set' }}</td></tr>
+      </table>
+      <p class="text-muted small">
+        To change email settings, edit the <code>.env</code> file and restart the application.
+        Set <code>MAIL_ENABLED=true</code> and fill in MAIL_SENDER, MAIL_PASSWORD, MAIL_RECEIVER.
+      </p>
+
+      <!-- Test email button -->
+      <form method="POST" class="mt-2">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <input type="hidden" name="action" value="test_email"/>
+        <button type="submit" class="btn btn-outline-cyan btn-sm"
+                {% if not mail_enabled %}disabled{% endif %}>
+          <i class="bi bi-envelope me-1"></i>Send Test Email
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Change password -->
+  <div class="col-md-6">
+    <div class="dash-card">
+      <h6 class="card-section-title">Change Password</h6>
+      <form method="POST" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <input type="hidden" name="action" value="change_password"/>
+
+        <div class="mb-3">
+          <label class="form-label text-light">Current Password</label>
+          <input type="password" name="current_password"
+                 class="form-control bg-dark text-light border-secondary" required/>
+        </div>
+        <div class="mb-3">
+          <label class="form-label text-light">New Password</label>
+          <input type="password" name="new_password"
+                 class="form-control bg-dark text-light border-secondary" required/>
+        </div>
+        <div class="mb-3">
+          <label class="form-label text-light">Confirm New Password</label>
+          <input type="password" name="confirm_password"
+                 class="form-control bg-dark text-light border-secondary" required/>
+        </div>
+        <button type="submit" class="btn btn-warning btn-sm">Change Password</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- App info -->
+  <div class="col-md-6">
+    <div class="dash-card">
+      <h6 class="card-section-title">Application Information</h6>
+      <table class="table table-dark table-sm mb-0">
+        <tr><th>Project</th><td>Smart Identity Detection System</td></tr>
+        <tr><th>Version</th><td>1.0.0</td></tr>
+        <tr><th>Stack</th><td>Flask, SQLite, OpenCV, face_recognition</td></tr>
+        <tr><th>Purpose</th><td>B.Tech Cybersecurity Mini Project</td></tr>
+      </table>
+      <p class="text-warning small mt-2">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        This application is for academic demonstration only. It is not suitable for
+        production deployment or consequential access-control decisions.
+      </p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

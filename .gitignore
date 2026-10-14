@@ -1,0 +1,27 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Database and uploads
+instance/
+uploads/faces/
+uploads/snapshots/
+known_faces/*
+!known_faces/.gitkeep
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+.venv/
+venv/
+
+# Test cache
+.pytest_cache/
+
+# OS metadata
+.DS_Store
+Thumbs.db
